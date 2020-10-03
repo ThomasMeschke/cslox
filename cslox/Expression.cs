@@ -2,6 +2,15 @@ namespace cslox
 {
     internal abstract class Expression
     {
+        protected abstract TEntity Accept<TEntity>(Visitor<TEntity> visitor);
+
+        internal interface Visitor<TEntity>
+        {
+            TEntity VisitBinaryExpression(Binary expression);
+            TEntity VisitGroupingExpression(Grouping expression);
+            TEntity VisitLiteralExpression(Literal expression);
+            TEntity VisitUnaryExpression(Unary expression);
+        }
         internal class Binary : Expression
         {
             private readonly Expression leftHandSide;
@@ -14,6 +23,11 @@ namespace cslox
                 this.operatorToken = operatorToken;
                 this.rightHandSide = rightHandSide;
             }
+
+            protected override TEntity Accept<TEntity>(Visitor<TEntity> visitor)
+            {
+                return visitor.VisitBinaryExpression(this);
+            }
         }
 
         internal class Grouping : Expression
@@ -24,6 +38,11 @@ namespace cslox
             {
                 this.expression = expression;
             }
+
+            protected override TEntity Accept<TEntity>(Visitor<TEntity> visitor)
+            {
+                return visitor.VisitGroupingExpression(this);
+            }
         }
 
         internal class Literal : Expression
@@ -33,6 +52,11 @@ namespace cslox
             public Literal(object value)
             {
                 this.value = value;
+            }
+
+            protected override TEntity Accept<TEntity>(Visitor<TEntity> visitor)
+            {
+                return visitor.VisitLiteralExpression(this);
             }
         }
 
@@ -45,6 +69,11 @@ namespace cslox
             {
                 this.operatorToken = operatorToken;
                 this.rightHandSide = rightHandSide;
+            }
+
+            protected override TEntity Accept<TEntity>(Visitor<TEntity> visitor)
+            {
+                return visitor.VisitUnaryExpression(this);
             }
         }
 

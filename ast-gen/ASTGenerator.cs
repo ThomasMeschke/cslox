@@ -33,6 +33,11 @@ namespace ast_gen
                 writer.WriteLine($"    internal abstract class {baseName}");
                 writer.WriteLine("    {");
 
+                writer.WriteLine("        protected abstract TEntity Accept<TEntity>(Visitor<TEntity> visitor);");
+                writer.WriteLine();
+
+                DefineVisitor(writer, baseName, types);
+
                 foreach(string type in types)
                 {
                     string className = type.Split(':').First().Trim();
@@ -43,6 +48,20 @@ namespace ast_gen
                 writer.WriteLine("    }");
                 writer.WriteLine("}");
             }
+        }
+
+        private static void DefineVisitor(StreamWriter writer, string baseName, List<string> types)
+        {
+            writer.WriteLine("        internal interface Visitor<TEntity>");
+            writer.WriteLine("        {");
+            
+            foreach (string type in types)
+            {
+                string typeName = type.Split(':').First().Trim();
+                writer.WriteLine($"            TEntity Visit{typeName}{baseName}({typeName} {baseName.ToLower()});");
+            }
+            
+            writer.WriteLine("        }");
         }
 
         private static void DefineType(StreamWriter writer, string baseName, string className, string fieldList)
@@ -66,6 +85,13 @@ namespace ast_gen
                 writer.WriteLine($"                this.{name} = {name};");
             }
             writer.WriteLine("            }");
+
+            writer.WriteLine();
+            writer.WriteLine("            protected override TEntity Accept<TEntity>(Visitor<TEntity> visitor)");
+            writer.WriteLine("            {");
+            writer.WriteLine($"                return visitor.Visit{className}{baseName}(this);");
+            writer.WriteLine("            }");
+            
             writer.WriteLine("        }");
             writer.WriteLine();
         }
