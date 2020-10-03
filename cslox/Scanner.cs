@@ -50,8 +50,42 @@ namespace cslox
                 case '<': AddToken(FollowedBy('=') ? TokenType.LessEqual : TokenType.Less); break;
                 case '>': AddToken(FollowedBy('=') ? TokenType.GreaterEqual : TokenType.Greater); break;
 
+                case '/':
+                    if (FollowedBy('/'))
+                    {
+                        // a comment goes until the end of the line
+                        while (Peek() != '\n' && !IsAtEnd())
+                        {
+                            Advance();
+                        }
+                    }
+                    else
+                    {
+                        AddToken(TokenType.Slash);
+                    }
+                    break;
+
+                case ' ':
+                case '\r':
+                case '\t':
+                    // ignore whitespaces
+                    break;
+
+                case '\n':
+                    line++;
+                    break;
+
+                case '"': HandleString(); break;
+
                 default:
-                    CsLox.Error(line, $"Unexpected character '{c}'.");
+                    if (IsDigit(c))
+                    {
+                        HandleNumber();
+                    }
+                    else
+                    {
+                        CsLox.Error(line, $"Unexpected character '{c}'.");
+                    }
                     break;
             }
         }
@@ -69,6 +103,71 @@ namespace cslox
 
             current++;
             return true;
+        }
+
+        private char Peek()
+        {
+            if (IsAtEnd()) return '\0';
+            return source[current];
+        }
+
+        private char PeekNext()
+        {
+            if (current + 1 >= source.Length) return '\0';
+            return source[current + 1];
+        }
+
+        private void HandleString()
+        {
+            while (Peek() != '"' && !IsAtEnd())
+            {
+                if (Peek() == '\n')
+                {
+                    line++;
+                }
+                Advance();
+            }
+
+            if (IsAtEnd())
+            {
+                // we've hit the end before we found the closing quotes
+                CsLox.Error(line, "Unterminated string");
+                return;
+            }
+
+            // consume the closing quotes
+            Advance();
+
+            // trim the surrounding quotes away
+            string value = source.Substring(start + 1, current - 1);
+            AddToken(TokenType.String, value);
+        }
+
+        private void HandleNumber()
+        {
+            while (IsDigit(Peek()))
+            {
+                Advance();
+            }
+
+            if (Peek() == '.' && IsDigit(PeekNext()))
+            {
+                // consume the dot as fraction separator
+                Advance();
+
+                while (IsDigit(Peek()))
+                {
+                    Advance();
+                }
+            }
+
+            string numberString = source.Substring(start, current);
+            AddToken(TokenType.Number, double.Parse(numberString));
+        }
+
+        private bool IsDigit(char c)
+        {
+            return c >= '0' && c <= '9';
         }
 
         private void AddToken(TokenType type, object literal = null)
