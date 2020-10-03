@@ -12,6 +12,26 @@ namespace cslox
         private int current = 0;
         private int line = 1;
 
+        private static readonly Dictionary<string, TokenType> keywords = new Dictionary<string, TokenType>()
+        {
+            { "and", TokenType.And },
+            { "or", TokenType.Or },
+            { "var", TokenType.Var },
+            { "fun", TokenType.Fun },
+            { "class", TokenType.Class },
+            { "if", TokenType.If },
+            { "else", TokenType.Else },
+            { "true", TokenType.True },
+            { "false", TokenType.False },
+            { "for", TokenType.For },
+            { "while", TokenType.While },
+            { "return", TokenType.Return },
+            { "nil", TokenType.Nil },
+            { "print", TokenType.Print },
+            { "super", TokenType.Super },
+            { "this", TokenType.This },
+        };
+
         public Scanner(string source)
         {
             this.source = source;
@@ -81,6 +101,10 @@ namespace cslox
                     if (IsDigit(c))
                     {
                         HandleNumber();
+                    }
+                    else if(IsAlpha(c))
+                    {
+                        HandleIdentifier();
                     }
                     else
                     {
@@ -165,9 +189,34 @@ namespace cslox
             AddToken(TokenType.Number, double.Parse(numberString));
         }
 
+        private void HandleIdentifier()
+        {
+            while (IsAlphaNumeric(Peek()))
+            {
+                Advance();
+            }
+
+            string text = source.Substring(start, current);
+            TokenType type = keywords.GetValueOrDefault(text, TokenType.Identifier);
+            AddToken(type);
+        }
+
         private bool IsDigit(char c)
         {
             return c >= '0' && c <= '9';
+        }
+
+        private bool IsAlpha(char c)
+        {
+            return
+                (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                (c == '_');
+        }
+
+        private bool IsAlphaNumeric(char c)
+        {
+            return IsAlpha(c) || IsDigit(c);
         }
 
         private void AddToken(TokenType type, object literal = null)
