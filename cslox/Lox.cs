@@ -67,7 +67,7 @@ namespace cslox
             }
         }
 
-        private static void Error(int line, string error)
+        internal static void Error(int line, string error)
         {
             Report(line, "", error);
         }

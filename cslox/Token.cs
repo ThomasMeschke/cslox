@@ -2,10 +2,10 @@ namespace cslox
 {
     public class Token
     {
-        public readonly TokenType Type;
-        public readonly string Lexeme;
-        public readonly object Literal;
-        public readonly int Line;
+        public TokenType Type { get; private set; }
+        public string Lexeme { get; private set; }
+        public object Literal { get; private set; }
+        public int Line { get; private set; }
 
         public Token(TokenType type, string lexeme, object literal, int line)
         {
