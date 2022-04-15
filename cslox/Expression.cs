@@ -30,9 +30,9 @@
         }
         public class Grouping : Expression
         {
-            public Grouping(Expression Expressionession)
+            public Grouping(Expression Expression)
             {
-                this.Expressionession = Expressionession;
+                this.Expression = Expression;
             }
 
             public override T accept<T>(IVisitor<T> visitor)
@@ -40,7 +40,7 @@
                 return visitor.visitGroupingExpression(this);
             }
 
-        public readonly Expression Expressionession;
+        public readonly Expression Expression;
         }
         public class Literal : Expression
         {

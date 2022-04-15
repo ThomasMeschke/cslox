@@ -16,7 +16,7 @@ namespace ast_gen
             string outputDir = args[0];
             DefineAST(outputDir, "Expression", new List<string>(){
                 "Binary     : Expression left, Token token, Expression right",
-                "Grouping   : Expression Expressionession",
+                "Grouping   : Expression Expression",
                 "Literal    : object value",
                 "Unary      : Token token, Expression right"
             });
