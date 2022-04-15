@@ -32,6 +32,8 @@ namespace ast_gen
             writer.WriteLine("    public abstract class " + baseName);
             writer.WriteLine("    {");
 
+            DefineVisitor(writer, baseName, types);
+
             foreach(string type in types)
             {
                 string className = type.Split(":")[0].Trim();
@@ -39,10 +41,28 @@ namespace ast_gen
                 DefineType(writer, baseName, className, fieldList);
             }
 
+            writer.WriteLine();
+            writer.WriteLine("        public abstract T accept<T>(IVisitor<T> visitor);");
+
             writer.WriteLine("    }");
             writer.WriteLine("}");
 
             writer.Close();
+        }
+
+        public static void DefineVisitor(StreamWriter writer, string baseName, List<string> types)
+        {
+            writer.WriteLine("        public interface IVisitor<T>");
+            writer.WriteLine("        {");
+            foreach(string type in types)
+            {
+                string className = type.Split(":")[0].Trim();
+                writer.Write("            T visit" + className + baseName + "(");
+                writer.Write(className + " " + baseName.ToLower());
+                writer.WriteLine(");");
+            }
+            writer.WriteLine("        }");
+            writer.WriteLine();
         }
 
         private static void DefineType(StreamWriter writer, string baseName, string className, string fieldList)
@@ -61,6 +81,13 @@ namespace ast_gen
                 string name = field.Split(" ")[1];
                 writer.WriteLine("                this." + name.ToUpperFirst() + " = " + name + ";");
             }
+            writer.WriteLine("            }");
+
+            // Visitor pattern.
+            writer.WriteLine();
+            writer.WriteLine("            public override T accept<T>(IVisitor<T> visitor)");
+            writer.WriteLine("            {");
+            writer.WriteLine("                return visitor.visit"+className + baseName + "(this);");
             writer.WriteLine("            }");
 
             // Fields. 
